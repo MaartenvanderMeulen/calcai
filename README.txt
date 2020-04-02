@@ -1,24 +1,12 @@
-python calcai.py < easy2.txt
+Given a problems specification in text, and with some numeric example inputs and outputs,
+the AI should give the formula that anwers the problem specification.
 
-easy2 is: (A+1)(B+2)(C+3) + ABC = 2ABC + 3AB + 2AC + BC + 6A + 3B + 2C + 6
+The problem has as answer the formula f for which for each input i f(input(i)) == output(i).
+Formula is composed of "+", "-", "*", "/", "(", ")", and possibly also "sin", "cos", and the various x0-xn = input(i).
+Example formula :
+    x*x + 2 : list of inputs [[1,], [2,], [3,], ]; list out corresponding outputs [3, 6, 11,]
+    1*x0 + 2*x1 + 3*x2 - 4*x0*x1*x2 + 5 : inputs are tuples (x0,x1,x2) and output is the result of the formula.
 
-hop 1, failed
-hop 2, failed
-hop 3, failed
-hop 4, failed
-hop 5, failed
-hop 6, solved: add(sub(sub(add(mul(add(add(B, 4), sub(A, B)), add(C, B)), mul(add(A, B), C)), sub(sub(sub(sub(add(B, B), sub(mul(A, add(B, B)), C)), add(add(A, add(A, add(sub(B, C), sub(2, B)))), add(A, B))), add(add(add(B, 4), sub(A, B)), add(A, B))), A)), B), mul(mul(A, add(B, B)), C))
-hop 7, failed
-hop 8, solved: add(mul(mul(B, C), add(A, A)), add(mul(C, add(A, A)), add(mul(add(add(A, add(A, A)), C), B), add(add(add(A, add(A, add(A, add(A, 6)))), C), add(add(B, add(add(B, add(A, B)), A)), C)))))
-hop 9, solved: add(mul(mul(B, A), add(C, add(4, C))), add(add(mul(C, B), mul(A, C)), add(add(A, add(add(5, add(add(A, add(A, add(mul(A, C), A))), add(add(mul(B, 2), sub(add(A, sub(A, 5)), mul(B, A))), C))), mul(1, B))), add(C, 6))))
-hop 10, failed
-hop 11, failed
-hop 12, failed
-hop 13, failed
-hop 14, failed
-hop 15, failed
-hop 16, failed
-hop 17, failed
-hop 18, failed
-hop 19, failed
-hop 20, solved: sub(mul(mul(C, A), add(add(3, B), B)), sub(add(A, add(add(B, add(add(sub(sub(B, add(A, 6)), C), add(add(add(add(B, B), sub(sub(B, A), C)), add(add(sub(add(B, B), mul(sub(3, C), sub(A, B))), B), sub(B, A))), B)), sub(B, A))), B)), mul(add(A, 6), add(add(B, B), B))))
+In its simplest form, (no descriptive text), it boils down to symbolic regression analysis.
+
+Run: python calcai.py < easy.txt

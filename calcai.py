@@ -48,7 +48,7 @@ def initialize_genetic_programming_toolbox(examples):
     pset.addPrimitive(operator.add, 2)
     pset.addPrimitive(operator.mul, 2)
     pset.addPrimitive(operator.sub, 2)
-    # pset.addPrimitive(protected_div, 2)
+    pset.addPrimitive(protected_div, 2)
     # pset.addPrimitive(operator.neg, 1)
     # pset.addPrimitive(math.cos, 1)
     # pset.addPrimitive(math.sin, 1)
@@ -69,13 +69,12 @@ def initialize_genetic_programming_toolbox(examples):
     toolbox.register("mate", gp.cxOnePoint)
     toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
     toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
-    toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
-    toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
+    toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=10))
+    toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=10))
     return toolbox
     
 
 def calc_ai(toolbox):
-    random.seed(318)
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)    
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
@@ -88,6 +87,7 @@ def calc_ai(toolbox):
 
 
 def main():
+    random.seed(318)
     examples = get_examples()
     toolbox = initialize_genetic_programming_toolbox(examples)
     for i in range(20):
@@ -97,7 +97,7 @@ def main():
         if error == 0:
             print(f"hop {i+1}, solved: {solution_str}")
         else:
-            print(f"hop {i+1}, failed")
+            print(f"hop {i+1}, error {error:.1f}: {solution_str}")
 
 
 if __name__ == "__main__":
