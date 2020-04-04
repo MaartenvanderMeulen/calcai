@@ -84,28 +84,34 @@ class PrefixParser:
 
 def prefix_to_infix(formula):
     if type(formula) == type([]):
-        # print(formula)
-        assert len(formula) == 3 # [operator arg1 arg2]
-        infix1 = prefix_to_infix(formula[1])
-        infix2 = prefix_to_infix(formula[2])
-        if formula[0] == "sub" and infix1 == infix2:
-            return "0"
-        if formula[0] == "mul" and (infix1 == "0" or infix2 == "0"):
-            return "0"
-        if formula[0] == "protected_div" and infix1 == infix2:
-            return "1"
-        if formula[0] == "add" and infix1 == "0":
-            return infix2
-        if formula[0] == "add" and infix2 == "0":
-            return infix1
-        if formula[0] == "sub" and infix2 == "0":
-            return infix1
-        if formula[0] == "mul" and infix1 == "1":
-            return infix2
-        if formula[0] == "mul" and infix2 == "1":
-            return infix1
-        operator = {"add":" + ", "sub":" - ", "mul":"*", "protected_div":"/"}[formula[0]]
-        return "(" + infix1 + operator + infix2 + ")"
+        if formula[0] == "protected_sqrt":
+            infix1 = prefix_to_infix(formula[1])
+            return "sqrt(" + infix1 + ")"
+        else:
+            if len(formula) != 3:
+                print(formula)
+                
+            assert len(formula) == 3 # [operator arg1 arg2]
+            infix1 = prefix_to_infix(formula[1])
+            infix2 = prefix_to_infix(formula[2])
+            if formula[0] == "sub" and infix1 == infix2:
+                return "0"
+            if formula[0] == "mul" and (infix1 == "0" or infix2 == "0"):
+                return "0"
+            if formula[0] == "protected_div" and infix1 == infix2:
+                return "1"
+            if formula[0] == "add" and infix1 == "0":
+                return infix2
+            if formula[0] == "add" and infix2 == "0":
+                return infix1
+            if formula[0] == "sub" and infix2 == "0":
+                return infix1
+            if formula[0] == "mul" and infix1 == "1":
+                return infix2
+            if formula[0] == "mul" and infix2 == "1":
+                return infix1
+            operator = {"add":" + ", "sub":" - ", "mul":"*", "protected_div":"/"}[formula[0]]
+            return "(" + infix1 + operator + infix2 + ")"
     else:
         assert type(formula) == type("")
         return formula
@@ -124,17 +130,21 @@ def read_examples(example_file):
     
 def evaluate(formula, a, b, c):
     if type(formula) == type([]):
-        assert len(formula) == 3 # [operator arg1 arg2]
-        arg1 = evaluate(formula[1], a, b, c)
-        arg2 = evaluate(formula[2], a, b, c)
-        if formula[0] == "add":
-            return arg1 + arg2
-        if formula[0] == "sub":
-            return arg1 - arg2
-        if formula[0] == "mul":
-            return arg1 * arg2
-        assert formula[0] == "protected_div"
-        return arg1 / arg2 if arg2 != 0 else 0.0
+        if formula[0] == "protected_sqrt":
+            arg1 = evaluate(formula[1], a, b, c)
+            return math.sqrt(arg1) if arg1 >= 0 else 0.0
+        else:
+            assert len(formula) == 3 # [operator arg1 arg2]
+            arg1 = evaluate(formula[1], a, b, c)
+            arg2 = evaluate(formula[2], a, b, c)
+            if formula[0] == "add":
+                return arg1 + arg2
+            if formula[0] == "sub":
+                return arg1 - arg2
+            if formula[0] == "mul":
+                return arg1 * arg2
+            assert formula[0] == "protected_div"
+            return arg1 / arg2 if arg2 != 0 else 0.0
     else:
         assert type(formula) == type("")
         if formula == "a":

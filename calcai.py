@@ -20,6 +20,11 @@ def protected_div(left, right):
         return 0 
         
         
+def protected_sqrt(x):
+    '''sqrt operator that has a normal result when sqrt negative numbers'''
+    return math.sqrt(x) if x >= 0 else 0.0
+    
+        
 def rmse(toolbox, individual):
     # Transform the tree expression in a callable function
     model = toolbox.compile(expr=individual)
@@ -54,10 +59,11 @@ def initialize_genetic_programming_toolbox(examples):
     pset.addPrimitive(operator.mul, 2)
     pset.addPrimitive(operator.sub, 2)
     pset.addPrimitive(protected_div, 2)
+    pset.addPrimitive(protected_sqrt, 1)
     # pset.addPrimitive(operator.neg, 1)
     # pset.addPrimitive(math.cos, 1)
     # pset.addPrimitive(math.sin, 1)
-    pset.addEphemeralConstant("randdigit", lambda: random.randint(1,9))
+    pset.addEphemeralConstant("randdigit", lambda: random.randint(2,9))
     pset.addTerminal(0.0, name="zero")
     pset.addTerminal(1.0, name="one")
     pset.addTerminal(10.0, name="ten")
@@ -116,7 +122,7 @@ def main():
         if error == 0:
             print(f"hop {hop+1}, solved, evals {evaluate_count}: {solution_str}")
         else:
-            if error < 0.1:
+            if error < 1000:
                 print(f"hop {hop+1}, error {error:.3f}, evals {evaluate_count}: {solution_str}")
     errors.sort()
     print(errors[:5])
