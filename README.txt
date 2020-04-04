@@ -10,3 +10,6 @@ Example formula's :
 In its simplest form, (no descriptive text), it boils down to symbolic regression analysis.
 
 Run: python calcai.py < easy.txt
+
+====================
+The solution to the easy problem is: A + 2B + 3C - ABC

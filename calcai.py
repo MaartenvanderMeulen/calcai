@@ -10,6 +10,7 @@ from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
+import prefix2infix
 
 def protected_div(left, right):
     '''division operator that has a normal result when dividing by zero'''
@@ -28,7 +29,11 @@ def rmse(toolbox, individual):
     return rmse
 
 
+evaluate_count = 0
+
 def evaluate(toolbox, individual):    
+    global evaluate_count
+    evaluate_count += 1
     penalty = len(str(individual)) / 1000 # Penalty for solutions that are longer than needed
     return rmse(toolbox, individual) + penalty,
 
@@ -52,7 +57,11 @@ def initialize_genetic_programming_toolbox(examples):
     # pset.addPrimitive(operator.neg, 1)
     # pset.addPrimitive(math.cos, 1)
     # pset.addPrimitive(math.sin, 1)
-    pset.addEphemeralConstant("randint", lambda: random.randint(1,9))
+    pset.addEphemeralConstant("randdigit", lambda: random.randint(1,9))
+    pset.addTerminal(0.0, name="zero")
+    pset.addTerminal(1.0, name="one")
+    pset.addTerminal(10.0, name="ten")
+    
     pset.renameArguments(ARG0='A')
     pset.renameArguments(ARG1='B')
     pset.renameArguments(ARG2='C')
@@ -74,30 +83,44 @@ def initialize_genetic_programming_toolbox(examples):
     return toolbox
     
 
-def calc_ai(toolbox):
-    pop = toolbox.population(n=300)
+def calc_ai(toolbox, pop_size, generations):
+    pop = toolbox.population(n=pop_size)
     hof = tools.HallOfFame(1)    
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
     mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
     mstats.register("min", numpy.min)
-    _, _ = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 200, stats=mstats,
+    _, _ = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, generations, stats=mstats,
                                    halloffame=hof, verbose=False)
     return hof[0]
 
 
 def main():
-    random.seed(318)
+    # random.seed(318)
     examples = get_examples()
     toolbox = initialize_genetic_programming_toolbox(examples)
-    for i in range(20):
-        solution = calc_ai(toolbox)
-        solution_str = str(solution)
+    prefix_parser = prefix2infix.PrefixParser()
+    global evaluate_count
+    count_found = 0
+    hops, pop_size, generations = 1000, 600, 200
+    print(f"hops={hops}, pop_size={pop_size}, generations={generations}, units={hops*pop_size*generations}")
+    errors = []
+    for hop in range(hops):
+        solution = calc_ai(toolbox, pop_size, generations)
+        formula = prefix_parser.parse_line(str(solution))
+        solution_str = prefix2infix.prefix_to_infix(formula)
         error = rmse(toolbox, solution)
+        error2 = prefix2infix.compute_rmse(formula, examples)
+        assert math.isclose(error, error2)
+        errors.append(error)
         if error == 0:
-            print(f"hop {i+1}, solved: {solution_str}")
+            print(f"hop {hop+1}, solved, evals {evaluate_count}: {solution_str}")
         else:
-            print(f"hop {i+1}, error {error:.1f}: {solution_str}")
+            if error < 0.1:
+                print(f"hop {hop+1}, error {error:.3f}, evals {evaluate_count}: {solution_str}")
+    errors.sort()
+    print(errors[:5])
+    print(f"median error {errors[hops//2]:.2f}, evals {evaluate_count}")
 
 
 if __name__ == "__main__":
