@@ -13,3 +13,5 @@ Run: python calcai.py < easy.txt
 
 ====================
 The solution to the easy problem is: A + 2B + 3C - ABC
+The solution to the medium problem is: A + AB + ABC - C^2 + C/A + 7B/C + sqrt(B)
+The solution to the hard problem is: ABC + AB^3 - B/(A+C) + 17
