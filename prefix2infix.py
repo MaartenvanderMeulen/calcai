@@ -1,5 +1,6 @@
 import sys
 import math
+import calcai
 
 
 def tokenize(line):
@@ -110,7 +111,7 @@ def prefix_to_infix(formula):
                 return infix2
             if formula[0] == "mul" and infix2 == "1":
                 return infix1
-            operator = {"add":" + ", "sub":" - ", "mul":"*", "protected_div":"/"}[formula[0]]
+            operator = {"add":" + ", "sub":" - ", "mul":"*", "protected_div":"/", "protected_power":"^"}[formula[0]]
             return "(" + infix1 + operator + infix2 + ")"
     else:
         assert type(formula) == type("")
@@ -132,7 +133,7 @@ def evaluate(formula, a, b, c):
     if type(formula) == type([]):
         if formula[0] == "protected_sqrt":
             arg1 = evaluate(formula[1], a, b, c)
-            return math.sqrt(arg1) if arg1 >= 0 else 0.0
+            return calcai.protected_sqrt(arg1)
         else:
             assert len(formula) == 3 # [operator arg1 arg2]
             arg1 = evaluate(formula[1], a, b, c)
@@ -143,8 +144,11 @@ def evaluate(formula, a, b, c):
                 return arg1 - arg2
             if formula[0] == "mul":
                 return arg1 * arg2
-            assert formula[0] == "protected_div"
-            return arg1 / arg2 if arg2 != 0 else 0.0
+            if formula[0] == "protected_div":
+                return calcai.protected_div(arg1, arg2)
+            if formula[0] == "protected_power":
+                return calcai.protected_power(arg1, arg2)
+            raise RuntimeError(f"prefix2infix.py line 150: onbekende operator '{formula[0]}'")
     else:
         assert type(formula) == type("")
         if formula == "a":

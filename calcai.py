@@ -15,21 +15,45 @@ import prefix2infix
 def protected_div(left, right):
     '''division operator that has a normal result when dividing by zero'''
     try:
-        return left / right
-    except ZeroDivisionError:
+        return float(left / right)
+    except:
         return 0 
         
         
 def protected_sqrt(x):
     '''sqrt operator that has a normal result when sqrt negative numbers'''
-    return math.sqrt(x) if x >= 0 else 0.0
+    try:
+        return float(math.sqrt(x)) if x >= 0 else 0.0
+    except:
+        return 1e17
+    
+        
+def protected_power(left, right):
+    '''power operator that has a normal result when left is a negative numbers'''
+    try:
+        return float(left ** right) if left > 0 else 0.0
+    except:
+        return 1e17
+    
+        
+def protected_sqr(x):
+    '''sqr operator that has a normal result when overflowing'''
+    try:
+        return float(x ** 2)
+    except:
+        return 1e17
     
         
 def rmse(toolbox, individual):
     # Transform the tree expression in a callable function
     model = toolbox.compile(expr=individual)
     # Evaluate with the root of mean squared error (RMSE)
-    se = [(model(x[0], x[1], x[2]) - y)**2 for x, y in toolbox.examples]
+    se = []
+    for x, y in toolbox.examples:
+        try:
+            se.append(protected_sqr(model(x[0], x[1], x[2]) - y))
+        except:
+            se.append(1e17)
     rmse = math.sqrt(sum(se) / len(toolbox.examples))
     return rmse
 
@@ -60,6 +84,7 @@ def initialize_genetic_programming_toolbox(examples):
     pset.addPrimitive(operator.sub, 2)
     pset.addPrimitive(protected_div, 2)
     pset.addPrimitive(protected_sqrt, 1)
+    pset.addPrimitive(protected_power, 2)
     # pset.addPrimitive(operator.neg, 1)
     # pset.addPrimitive(math.cos, 1)
     # pset.addPrimitive(math.sin, 1)
@@ -106,11 +131,9 @@ def main():
     examples = get_examples()
     toolbox = initialize_genetic_programming_toolbox(examples)
     prefix_parser = prefix2infix.PrefixParser()
-    global evaluate_count
-    count_found = 0
     hops, pop_size, generations = 1000, 600, 200
     print(f"hops={hops}, pop_size={pop_size}, generations={generations}, units={hops*pop_size*generations}")
-    errors = []
+    best_error = 1e19
     for hop in range(hops):
         solution = calc_ai(toolbox, pop_size, generations)
         formula = prefix_parser.parse_line(str(solution))
@@ -118,15 +141,9 @@ def main():
         error = rmse(toolbox, solution)
         error2 = prefix2infix.compute_rmse(formula, examples)
         assert math.isclose(error, error2)
-        errors.append(error)
-        if error == 0:
-            print(f"hop {hop+1}, solved, evals {evaluate_count}: {solution_str}")
-        else:
-            if error < 1000:
-                print(f"hop {hop+1}, error {error:.3f}, evals {evaluate_count}: {solution_str}")
-    errors.sort()
-    print(errors[:5])
-    print(f"median error {errors[hops//2]:.2f}, evals {evaluate_count}")
+        if best_error > error:
+            best_error = error
+            print(f"hop {hop+1}, error {error:.3f}: {solution_str}")
 
 
 if __name__ == "__main__":
